@@ -14,6 +14,7 @@ import ominext.com.drawingapplication.R;
 import ominext.com.drawingapplication.fragment.BrushSizeChooserFragment;
 import ominext.com.drawingapplication.listeners.OnNewBrushSizeSelectedListener;
 import ominext.com.drawingapplication.view.DrawingView;
+import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_color:
                 resetMenuBackground();
                 mBtnColor.setBackgroundResource(R.drawable.radius_green_border);
+                pickColor();
                 break;
             case R.id.btn_delete:
                 resetMenuBackground();
@@ -118,17 +120,29 @@ public class MainActivity extends AppCompatActivity {
             public void onNewBrushSizeSelected(float newBrushSize) {
                 mDrawingView.setBrushSize(newBrushSize);
                 mDrawingView.setLastBrushSize(newBrushSize);
-                if (mDrawingView.isDrawMode()) {
-                    mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
-                    mBtnErase.setBackgroundResource(R.color.transparent);
-                } else {
-                    mBtnPencil.setBackgroundResource(R.color.transparent);
-                    mBtnErase.setBackgroundResource(R.drawable.radius_green_border);
-                }
+                setDrawModeBackground();
                 mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
             }
         });
         brushDialog.show(getSupportFragmentManager(), "Dialog");
+    }
+
+    private void pickColor() {
+        AmbilWarnaDialog colorPickerDialog = new AmbilWarnaDialog(this, mDrawingView.getPaintColor(), true, new AmbilWarnaDialog.OnAmbilWarnaListener() {
+            @Override
+            public void onCancel(AmbilWarnaDialog dialog) {
+                setDrawModeBackground();
+                mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
+            }
+
+            @Override
+            public void onOk(AmbilWarnaDialog dialog, int color) {
+                mDrawingView.setPaintColor(color);
+                setDrawModeBackground();
+                mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
+            }
+        });
+        colorPickerDialog.show();
     }
 
     private void resetMenuBackground() {
@@ -140,5 +154,15 @@ public class MainActivity extends AppCompatActivity {
         mBtnUndo.setBackgroundResource(R.color.transparent);
         mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
         mBtnImage.setBackgroundResource(R.color.transparent);
+    }
+
+    private void setDrawModeBackground() {
+        if (mDrawingView.isDrawMode()) {
+            mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
+            mBtnErase.setBackgroundResource(R.color.transparent);
+        } else {
+            mBtnPencil.setBackgroundResource(R.color.transparent);
+            mBtnErase.setBackgroundResource(R.drawable.radius_green_border);
+        }
     }
 }

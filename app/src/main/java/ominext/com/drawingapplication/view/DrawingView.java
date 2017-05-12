@@ -28,7 +28,6 @@ public class DrawingView extends View {
     private Path mDrawPath;
     private Canvas mCanvas;
     private Paint mDrawPaint;
-    private int mPaintColor;
 
     private float mCurrentBrushSize;
     private float mLastBrushSize;
@@ -83,6 +82,14 @@ public class DrawingView extends View {
 
     public boolean isDrawMode() {
         return mDrawMode;
+    }
+
+    public int getPaintColor() {
+        return mDrawPaint.getColor();
+    }
+
+    public void setPaintColor(int paintColor) {
+        mDrawPaint.setColor(paintColor);
     }
 
     @Override
@@ -143,8 +150,7 @@ public class DrawingView extends View {
     private Paint initDrawPaint() {
         Paint paint = new Paint();
         paint.setStrokeWidth(mCurrentBrushSize);
-        mPaintColor = Color.parseColor(mDrawMode ? DEFAULT_PAINT_COLOR : COLOR_WHITE);
-        paint.setColor(mPaintColor);
+        paint.setColor(mDrawMode ? Color.parseColor(DEFAULT_PAINT_COLOR) : Color.parseColor(COLOR_WHITE));
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeJoin(Paint.Join.ROUND);
