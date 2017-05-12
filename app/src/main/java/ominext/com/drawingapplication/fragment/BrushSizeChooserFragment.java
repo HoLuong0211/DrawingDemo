@@ -76,10 +76,11 @@ public class BrushSizeChooserFragment extends DialogFragment {
 
             currentValue = (TextView) dialogView.findViewById(R.id.text_view_brush_size);
             if (currentBrushSize > 0) {
-                currentValue.setText(getResources().getString(R.string.label_brush_size) + currentBrushSize);
+                currentValue.setText(getResources().getString(R.string.label_brush_size) + ": " + currentBrushSize);
             }
 
             brushSizeSeekBar = (SeekBar) dialogView.findViewById(R.id.seek_bar_brush_size);
+            brushSizeSeekBar.setProgress(currentBrushSize);
             brushSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 int progressChanged = 0;
 
@@ -96,7 +97,7 @@ public class BrushSizeChooserFragment extends DialogFragment {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    mListener.onNewBrushSizeSelected(progressChanged);
+
                 }
             });
 
@@ -107,6 +108,10 @@ public class BrushSizeChooserFragment extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        int progressChanged = brushSizeSeekBar.getProgress();
+                        if (progressChanged != currentBrushSize) {
+                            mListener.onNewBrushSizeSelected(progressChanged);
+                        }
                     }
                 })
                 .setView(dialogView);

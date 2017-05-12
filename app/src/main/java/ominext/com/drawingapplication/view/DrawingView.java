@@ -33,7 +33,9 @@ public class DrawingView extends View {
     private float mLastBrushSize;
 
     private ArrayList<Path> mPaths = new ArrayList<>();
+    private ArrayList<Paint> mPaints = new ArrayList<>();
     private ArrayList<Path> mUndonePaths = new ArrayList<>();
+    private ArrayList<Paint> mUndonePaints = new ArrayList<>();
 
     private float mX;
     private float mY;
@@ -52,7 +54,7 @@ public class DrawingView extends View {
         mCurrentBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 newSize, getResources().getDisplayMetrics());
 //        canvasPaint.setStrokeWidth(newSize);
-        mDrawPaint.setStrokeWidth(newSize);
+        mDrawPaint.setStrokeWidth(mCurrentBrushSize);
     }
 
     public void setLastBrushSize(float lastSize) {
@@ -74,9 +76,8 @@ public class DrawingView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        for (Path p : mPaths) {
-            canvas.drawPath(p, mDrawPaint);
+        for (int i = 0; i < mPaths.size(); i++) {
+            canvas.drawPath(mPaths.get(i), mPaints.get(i));
         }
         canvas.drawPath(mDrawPath, mDrawPaint);
     }
@@ -123,15 +124,19 @@ public class DrawingView extends View {
         mLastBrushSize = mCurrentBrushSize;
 
         mDrawPath = new Path();
-        mDrawPaint = new Paint();
-
-        mDrawPaint.setStrokeWidth(mCurrentBrushSize);
         mPaintColor = Color.parseColor(DEFAULT_PAINT_COLOR);
-        mDrawPaint.setColor(mPaintColor);
-        mDrawPaint.setAntiAlias(true);
-        mDrawPaint.setStyle(Paint.Style.STROKE);
-        mDrawPaint.setStrokeJoin(Paint.Join.ROUND);
-        mDrawPaint.setStrokeCap(Paint.Cap.ROUND);
+        mDrawPaint = getDrawPaint();
+    }
+
+    private Paint getDrawPaint() {
+        Paint paint = new Paint();
+        paint.setStrokeWidth(mCurrentBrushSize);
+        paint.setColor(mPaintColor);
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        return paint;
     }
 
     private void touch_start(float x, float y) {
@@ -156,12 +161,14 @@ public class DrawingView extends View {
         mDrawPath.lineTo(mX, mY);
         mCanvas.drawPath(mDrawPath, mDrawPaint);
         mPaths.add(mDrawPath);
+        mPaints.add(getDrawPaint());
         mDrawPath = new Path();
 
     }
 
     public void eraseAll() {
         mPaths.clear();
+        mPaints.clear();
         //redraw
         invalidate();
     }
@@ -169,6 +176,7 @@ public class DrawingView extends View {
     public void undo() {
         if (mPaths.size() > 0) {
             mUndonePaths.add(mPaths.remove(mPaths.size() - 1));
+            mUndonePaints.add(mPaints.remove(mPaints.size() - 1));
             invalidate();
         }
     }
@@ -176,6 +184,7 @@ public class DrawingView extends View {
     public void redo() {
         if (mUndonePaths.size() > 0) {
             mPaths.add(mUndonePaths.remove(mUndonePaths.size() - 1));
+            mPaints.add(mUndonePaints.remove(mUndonePaints.size() - 1));
             invalidate();
         }
     }
