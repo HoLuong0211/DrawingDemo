@@ -52,11 +52,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_pencil:
                 resetMenuBackground();
                 mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
+                mDrawingView.setDrawMode(true);
                 break;
             case R.id.btn_erase:
                 resetMenuBackground();
                 mBtnErase.setBackgroundResource(R.drawable.radius_green_border);
-                mDrawingView.eraseAll();
+                mDrawingView.setDrawMode(false);
                 break;
             case R.id.btn_color:
                 resetMenuBackground();

@@ -23,6 +23,7 @@ public class DrawingView extends View {
     private static final float TOUCH_TOLERANCE = 4f;
     private static final float DEFAULT_BRUSH_SIZE = 10f;
     private static final String DEFAULT_PAINT_COLOR = "#1abf9a";
+    private static final String COLOR_WHITE = "#FFFFFF";
 
     private Path mDrawPath;
     private Canvas mCanvas;
@@ -71,6 +72,14 @@ public class DrawingView extends View {
 
     public int getUndonePathsSize() {
         return mUndonePaths.size();
+    }
+
+    public void setDrawMode(boolean drawMode) {
+        if (drawMode) {
+            mDrawPaint = initDrawPaint();
+        } else {
+            mDrawPaint = initErase();
+        }
     }
 
     @Override
@@ -125,12 +134,24 @@ public class DrawingView extends View {
 
         mDrawPath = new Path();
         mPaintColor = Color.parseColor(DEFAULT_PAINT_COLOR);
-        mDrawPaint = getDrawPaint();
+        mDrawPaint = initDrawPaint();
     }
 
-    private Paint getDrawPaint() {
+    private Paint initDrawPaint() {
         Paint paint = new Paint();
         paint.setStrokeWidth(mCurrentBrushSize);
+        paint.setColor(mPaintColor);
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        return paint;
+    }
+
+    private Paint initErase() {
+        Paint paint = new Paint();
+        paint.setStrokeWidth(mCurrentBrushSize);
+        mPaintColor = Color.parseColor(COLOR_WHITE);
         paint.setColor(mPaintColor);
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
@@ -161,7 +182,7 @@ public class DrawingView extends View {
         mDrawPath.lineTo(mX, mY);
         mCanvas.drawPath(mDrawPath, mDrawPaint);
         mPaths.add(mDrawPath);
-        mPaints.add(getDrawPaint());
+        mPaints.add(new Paint(mDrawPaint));
         mDrawPath = new Path();
 
     }
@@ -171,6 +192,7 @@ public class DrawingView extends View {
         mPaints.clear();
         //redraw
         invalidate();
+        mDrawPaint = initDrawPaint();
     }
 
     public void undo() {
