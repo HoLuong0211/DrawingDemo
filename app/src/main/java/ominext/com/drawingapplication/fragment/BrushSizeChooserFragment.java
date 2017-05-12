@@ -109,9 +109,7 @@ public class BrushSizeChooserFragment extends DialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         int progressChanged = brushSizeSeekBar.getProgress();
-                        if (progressChanged != currentBrushSize) {
-                            mListener.onNewBrushSizeSelected(progressChanged);
-                        }
+                        mListener.onNewBrushSizeSelected(progressChanged);
                     }
                 })
                 .setView(dialogView);

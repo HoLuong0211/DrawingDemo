@@ -70,15 +70,13 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.btn_undo:
                 resetMenuBackground();
-                mBtnUndo.setBackgroundResource(R.drawable.radius_green_border);
                 mDrawingView.undo();
-                mBtnUndo.setBackgroundResource(R.color.transparent);
                 mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
                 break;
             case R.id.btn_redo:
                 resetMenuBackground();
-                mBtnRedo.setBackgroundResource(R.drawable.radius_green_border);
                 mDrawingView.redo();
+                mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
                 break;
             case R.id.btn_change_brush_size:
                 resetMenuBackground();
@@ -120,6 +118,14 @@ public class MainActivity extends AppCompatActivity {
             public void onNewBrushSizeSelected(float newBrushSize) {
                 mDrawingView.setBrushSize(newBrushSize);
                 mDrawingView.setLastBrushSize(newBrushSize);
+                if (mDrawingView.isDrawMode()) {
+                    mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
+                    mBtnErase.setBackgroundResource(R.color.transparent);
+                } else {
+                    mBtnPencil.setBackgroundResource(R.color.transparent);
+                    mBtnErase.setBackgroundResource(R.drawable.radius_green_border);
+                }
+                mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
             }
         });
         brushDialog.show(getSupportFragmentManager(), "Dialog");

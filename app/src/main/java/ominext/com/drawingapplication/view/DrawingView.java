@@ -41,6 +41,8 @@ public class DrawingView extends View {
     private float mX;
     private float mY;
 
+    private boolean mDrawMode;
+
     public DrawingView(Context context) {
         super(context);
         init();
@@ -75,11 +77,12 @@ public class DrawingView extends View {
     }
 
     public void setDrawMode(boolean drawMode) {
-        if (drawMode) {
-            mDrawPaint = initDrawPaint();
-        } else {
-            mDrawPaint = initErase();
-        }
+        mDrawMode = drawMode;
+        mDrawPaint = initDrawPaint();
+    }
+
+    public boolean isDrawMode() {
+        return mDrawMode;
     }
 
     @Override
@@ -133,25 +136,14 @@ public class DrawingView extends View {
         mLastBrushSize = mCurrentBrushSize;
 
         mDrawPath = new Path();
-        mPaintColor = Color.parseColor(DEFAULT_PAINT_COLOR);
+        mDrawMode = true;
         mDrawPaint = initDrawPaint();
     }
 
     private Paint initDrawPaint() {
         Paint paint = new Paint();
         paint.setStrokeWidth(mCurrentBrushSize);
-        paint.setColor(mPaintColor);
-        paint.setAntiAlias(true);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        return paint;
-    }
-
-    private Paint initErase() {
-        Paint paint = new Paint();
-        paint.setStrokeWidth(mCurrentBrushSize);
-        mPaintColor = Color.parseColor(COLOR_WHITE);
+        mPaintColor = Color.parseColor(mDrawMode ? DEFAULT_PAINT_COLOR : COLOR_WHITE);
         paint.setColor(mPaintColor);
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
