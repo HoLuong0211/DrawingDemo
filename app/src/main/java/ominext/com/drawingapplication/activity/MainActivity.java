@@ -5,8 +5,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
     }
 
-    @OnClick({R.id.btn_color, R.id.btn_delete, R.id.btn_erase, R.id.btn_pencil, R.id.btn_redo, R.id.btn_change_brush_size, R.id.btn_undo, R.id.btn_image})
+    @OnClick({R.id.btn_color, R.id.btn_delete, R.id.btn_erase, R.id.btn_pencil, R.id.btn_redo,
+            R.id.btn_change_brush_size, R.id.btn_undo, R.id.btn_image, R.id.btn_save, R.id.btn_share})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_pencil:
@@ -101,6 +107,11 @@ public class MainActivity extends AppCompatActivity {
                 resetMenuBackground();
                 mBtnImage.setBackgroundResource(R.drawable.radius_green_border);
                 chooseImageFromGallery();
+                break;
+            case R.id.btn_save:
+                break;
+            case R.id.btn_share:
+                shareDrawing();
                 break;
             default:
                 break;
@@ -227,6 +238,50 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void shareDrawing() {
+        mDrawingView.setDrawingCacheEnabled(true);
+        mDrawingView.invalidate();
+        String path = Environment.getExternalStorageDirectory().toString();
+        OutputStream fOut = null;
+        File file = new File(path,
+                "android_drawing_app.png");
+        file.getParentFile().mkdirs();
+
+        try {
+            file.createNewFile();
+        } catch (Exception e) {
+            Log.e(TAG, e.getCause() + e.getMessage());
+        }
+
+        try {
+            fOut = new FileOutputStream(file);
+        } catch (Exception e) {
+            Log.e(TAG, e.getCause() + e.getMessage());
+        }
+
+        if (mDrawingView.getDrawingCache() == null) {
+            Log.e(TAG, "Unable to get drawing cache ");
+        }
+
+        mDrawingView.getDrawingCache()
+                .compress(Bitmap.CompressFormat.JPEG, 85, fOut);
+
+        try {
+            fOut.flush();
+            fOut.close();
+        } catch (IOException e) {
+            Log.e(TAG, e.getCause() + e.getMessage());
+        }
+
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        shareIntent.setType("image/png");
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent, "Share image"));
+    }
+
 
     private void resetMenuBackground() {
         mBtnColor.setBackgroundResource(R.color.transparent);
