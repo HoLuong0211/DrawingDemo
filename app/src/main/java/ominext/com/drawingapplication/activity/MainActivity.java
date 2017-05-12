@@ -1,11 +1,20 @@
 package ominext.com.drawingapplication.activity;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -13,12 +22,15 @@ import butterknife.OnClick;
 import ominext.com.drawingapplication.R;
 import ominext.com.drawingapplication.fragment.BrushSizeChooserFragment;
 import ominext.com.drawingapplication.listeners.OnNewBrushSizeSelectedListener;
+import ominext.com.drawingapplication.util.ImageUtils;
 import ominext.com.drawingapplication.view.DrawingView;
 import yuku.ambilwarna.AmbilWarnaDialog;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = MainActivity.class.getSimpleName();
+    private static final int REQUEST_CODE_CHOOSE_IMAGE = 100;
+    public static final String MANUFACTURE_XIAOMI = "Xiaomi";
 
     @BindView(R.id.drawing_view)
     DrawingView mDrawingView;
@@ -88,9 +100,53 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btn_image:
                 resetMenuBackground();
                 mBtnImage.setBackgroundResource(R.drawable.radius_green_border);
+                chooseImageFromGallery();
                 break;
             default:
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_CHOOSE_IMAGE) {
+            if (data != null && data.getData() != null) {
+                String imagePath = ImageUtils.getPath(this, data.getData());
+                Bitmap myBitmap = BitmapFactory.decodeFile(imagePath);
+                Bitmap rotatedBitmap = null;
+                try {
+                    rotatedBitmap = ImageUtils.modifyOrientation(myBitmap, imagePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if (rotatedBitmap != null) {
+                    if (rotatedBitmap.getWidth() >= rotatedBitmap.getHeight()) {
+                        rotatedBitmap = Bitmap.createBitmap(
+                                rotatedBitmap,
+                                rotatedBitmap.getWidth() / 2 - rotatedBitmap.getHeight() / 2,
+                                0,
+                                rotatedBitmap.getHeight(),
+                                rotatedBitmap.getHeight()
+                        );
+                    } else {
+                        rotatedBitmap = Bitmap.createBitmap(
+                                rotatedBitmap,
+                                0,
+                                rotatedBitmap.getHeight() / 2 - rotatedBitmap.getWidth() / 2,
+                                rotatedBitmap.getWidth(),
+                                rotatedBitmap.getWidth()
+                        );
+                    }
+                    mDrawingView.setBackgroundImage(rotatedBitmap);
+                } else {
+                    if (myBitmap != null) {
+                        mDrawingView.setBackgroundImage(myBitmap);
+                    }
+                }
+            }
+            setDrawModeBackground();
+            mBtnImage.setBackgroundResource(R.color.transparent);
         }
     }
 
@@ -132,17 +188,44 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancel(AmbilWarnaDialog dialog) {
                 setDrawModeBackground();
-                mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
+                mBtnColor.setBackgroundResource(R.color.transparent);
             }
 
             @Override
             public void onOk(AmbilWarnaDialog dialog, int color) {
                 mDrawingView.setPaintColor(color);
                 setDrawModeBackground();
-                mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
+                mBtnColor.setBackgroundResource(R.color.transparent);
             }
         });
         colorPickerDialog.show();
+    }
+
+    private void chooseImageFromGallery() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setType("image/*");
+            startActivityForResult(intent, REQUEST_CODE_CHOOSE_IMAGE);
+        } else {
+            String manufacturer = Build.MANUFACTURER;
+            Log.i(TAG, "====>manufacturer:" + manufacturer);
+            if (MANUFACTURE_XIAOMI.equals(manufacturer)) {
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*"});
+                startActivityForResult(
+                        Intent.createChooser(intent, getString(R.string.choose_picture)),
+                        REQUEST_CODE_CHOOSE_IMAGE);
+            } else {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("image/*");
+                intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*",});
+                startActivityForResult(intent, REQUEST_CODE_CHOOSE_IMAGE);
+            }
+        }
     }
 
     private void resetMenuBackground() {

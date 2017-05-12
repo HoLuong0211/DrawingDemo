@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -206,6 +208,17 @@ public class DrawingView extends View {
             mPaths.add(mUndonePaths.remove(mUndonePaths.size() - 1));
             mPaints.add(mUndonePaints.remove(mUndonePaints.size() - 1));
             invalidate();
+        }
+    }
+
+    public void setBackgroundImage(Bitmap bitmap) {
+        eraseAll();
+        Bitmap screenBitmap = Bitmap.createScaledBitmap(bitmap, mCanvas.getWidth(), mCanvas.getHeight(), false);
+        BitmapDrawable bd = new BitmapDrawable(getContext().getResources(), screenBitmap);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            setBackground(bd);
+        } else {
+            setBackgroundDrawable(bd);
         }
     }
 }
