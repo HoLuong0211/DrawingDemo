@@ -42,22 +42,18 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.drawing_view)
     DrawingView mDrawingView;
-    @BindView(R.id.btn_undo)
-    FrameLayout mBtnUndo;
     @BindView(R.id.btn_pencil)
     FrameLayout mBtnPencil;
-    @BindView(R.id.btn_redo)
-    FrameLayout mBtnRedo;
     @BindView(R.id.btn_erase)
     FrameLayout mBtnErase;
     @BindView(R.id.btn_color)
     FrameLayout mBtnColor;
     @BindView(R.id.btn_delete)
     FrameLayout mBtnDelete;
-    @BindView(R.id.btn_image)
-    FrameLayout mBtnImage;
     @BindView(R.id.btn_change_brush_size)
     FrameLayout mBtnChangeBrushSize;
+    @BindView(R.id.btn_save)
+    FrameLayout mBtnSaveDrawing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnClick({R.id.btn_color, R.id.btn_delete, R.id.btn_erase, R.id.btn_pencil, R.id.btn_redo,
-            R.id.btn_change_brush_size, R.id.btn_undo, R.id.btn_image, R.id.btn_save, R.id.btn_share})
+            R.id.btn_change_brush_size, R.id.btn_undo, R.id.btn_choose_image, R.id.btn_save, R.id.btn_share})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btn_pencil:
@@ -92,26 +88,22 @@ public class MainActivity extends AppCompatActivity {
                 deleteDialog();
                 break;
             case R.id.btn_undo:
-                resetMenuBackground();
                 mDrawingView.undo();
-                mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
                 break;
             case R.id.btn_redo:
-                resetMenuBackground();
                 mDrawingView.redo();
-                mBtnPencil.setBackgroundResource(R.drawable.radius_green_border);
                 break;
             case R.id.btn_change_brush_size:
                 resetMenuBackground();
                 mBtnChangeBrushSize.setBackgroundResource(R.drawable.radius_green_border);
                 brushSizePicker();
                 break;
-            case R.id.btn_image:
-                resetMenuBackground();
-                mBtnImage.setBackgroundResource(R.drawable.radius_green_border);
+            case R.id.btn_choose_image:
                 chooseImageFromGallery();
                 break;
             case R.id.btn_save:
+                resetMenuBackground();
+                mBtnSaveDrawing.setBackgroundResource(R.drawable.radius_green_border);
                 saveImageDialog();
                 break;
             case R.id.btn_share:
@@ -161,7 +153,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             setDrawModeBackground();
-            mBtnImage.setBackgroundResource(R.color.transparent);
         }
     }
 
@@ -173,11 +164,15 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mDrawingView.eraseAll();
                 dialog.dismiss();
+                setDrawModeBackground();
+                mBtnDelete.setBackgroundResource(R.color.transparent);
             }
         });
         deleteDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                setDrawModeBackground();
+                mBtnDelete.setBackgroundResource(R.color.transparent);
             }
         });
         deleteDialog.show();
@@ -298,11 +293,15 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, "Unable to save image!", Toast.LENGTH_SHORT).show();
                 }
+                setDrawModeBackground();
+                mBtnSaveDrawing.setBackgroundResource(R.color.transparent);
             }
         });
         dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
+                setDrawModeBackground();
+                mBtnSaveDrawing.setBackgroundResource(R.color.transparent);
             }
         });
         dialog.show();
@@ -314,10 +313,7 @@ public class MainActivity extends AppCompatActivity {
         mBtnDelete.setBackgroundResource(R.color.transparent);
         mBtnErase.setBackgroundResource(R.color.transparent);
         mBtnPencil.setBackgroundResource(R.color.transparent);
-        mBtnRedo.setBackgroundResource(R.color.transparent);
-        mBtnUndo.setBackgroundResource(R.color.transparent);
         mBtnChangeBrushSize.setBackgroundResource(R.color.transparent);
-        mBtnImage.setBackgroundResource(R.color.transparent);
     }
 
     private void setDrawModeBackground() {
