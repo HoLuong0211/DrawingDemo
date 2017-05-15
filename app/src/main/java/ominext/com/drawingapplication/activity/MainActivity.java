@@ -15,6 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,7 +28,9 @@ import butterknife.OnClick;
 import ominext.com.drawingapplication.R;
 import ominext.com.drawingapplication.fragment.BrushSizeChooserFragment;
 import ominext.com.drawingapplication.listeners.OnNewBrushSizeSelectedListener;
+import ominext.com.drawingapplication.util.Constant;
 import ominext.com.drawingapplication.util.ImageUtils;
+import ominext.com.drawingapplication.util.Utils;
 import ominext.com.drawingapplication.view.DrawingView;
 import yuku.ambilwarna.AmbilWarnaDialog;
 
@@ -109,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
                 chooseImageFromGallery();
                 break;
             case R.id.btn_save:
+                saveImageDialog();
                 break;
             case R.id.btn_share:
                 shareDrawing();
@@ -280,6 +284,28 @@ public class MainActivity extends AppCompatActivity {
         shareIntent.setType("image/png");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, "Share image"));
+    }
+
+    private void saveImageDialog() {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Save drawing");
+        dialog.setMessage("The Drawing will be saved in PNG format?");
+        dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                if (ImageUtils.saveImage(mDrawingView.getCanvasBitmap(), Constant.SAVED_IMAGE_FILE_PATH, Utils.getDateTimeString(), Bitmap.CompressFormat.PNG, 90)) {
+                    Toast.makeText(MainActivity.this, "Saved", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Unable to save image!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog.show();
     }
 
 

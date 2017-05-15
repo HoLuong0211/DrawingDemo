@@ -30,6 +30,7 @@ public class DrawingView extends View {
     private Path mDrawPath;
     private Canvas mCanvas;
     private Paint mDrawPaint;
+    private Bitmap mCanvasBitmap;
 
     private float mCurrentBrushSize;
     private float mLastBrushSize;
@@ -94,6 +95,10 @@ public class DrawingView extends View {
         mDrawPaint.setColor(paintColor);
     }
 
+    public Bitmap getCanvasBitmap() {
+        return mCanvasBitmap;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -108,9 +113,9 @@ public class DrawingView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
 
         //create Bitmap of certain w,h
-        Bitmap canvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        mCanvasBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         //apply bitmap to graphic to start drawing.
-        mCanvas = new Canvas(canvasBitmap);
+        mCanvas = new Canvas(mCanvasBitmap);
     }
 
     @Override
@@ -193,6 +198,7 @@ public class DrawingView extends View {
         //redraw
         invalidate();
         mDrawPaint = initDrawPaint();
+        mCanvasBitmap = Bitmap.createBitmap(mCanvas.getWidth(), mCanvas.getHeight(), Bitmap.Config.ARGB_8888);
     }
 
     public void undo() {
@@ -213,8 +219,8 @@ public class DrawingView extends View {
 
     public void setBackgroundImage(Bitmap bitmap) {
         eraseAll();
-        Bitmap screenBitmap = Bitmap.createScaledBitmap(bitmap, mCanvas.getWidth(), mCanvas.getHeight(), false);
-        BitmapDrawable bd = new BitmapDrawable(getContext().getResources(), screenBitmap);
+        mCanvasBitmap = Bitmap.createScaledBitmap(bitmap, mCanvas.getWidth(), mCanvas.getHeight(), false);
+        BitmapDrawable bd = new BitmapDrawable(getContext().getResources(), mCanvasBitmap);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setBackground(bd);
         } else {

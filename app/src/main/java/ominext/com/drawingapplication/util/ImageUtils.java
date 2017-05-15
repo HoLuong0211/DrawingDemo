@@ -11,7 +11,10 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -194,30 +197,47 @@ public class ImageUtils {
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
-    public static int getRotation(Context context, Uri selectedImage) {
-        String[] filePathColumn = {MediaStore.Images.Media.ORIENTATION};
-        Cursor cursor = context.getContentResolver().query(selectedImage,
-                filePathColumn, null, null, null);
-        int rotation = 0;
-        if (cursor != null) {
-            cursor.moveToFirst();
-            rotation = cursor.getInt(0);
-            cursor.close();
-        }
-        return rotation;
-    }
+    public static boolean saveImage(Bitmap bitmap, String filePath, String filename,
+                                    Bitmap.CompressFormat format, int quality) {
 
-    public static Bitmap rotateImageIfRequired(Context context, Bitmap image, Uri selectedImage) {
-        // Detect rotation
-        int rotation = getRotation(context, selectedImage);
-        if (rotation != 0) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotation);
-            Bitmap rotatedImg = Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), matrix, true);
-            image.recycle();
-            return rotatedImg;
-        } else {
-            return image;
+        if (quality > 100) {
+            Log.d("saveImage", "quality cannot be greater that 100");
+            return false;
         }
+        File file;
+        File myDir = new File(filePath);
+        myDir.mkdirs();
+        FileOutputStream out = null;
+        try {
+            switch (format) {
+                case PNG:
+                    file = new File(myDir, filename + ".png");
+                    if (file.exists()) file.delete();
+                    out = new FileOutputStream(file);
+                    return bitmap.compress(Bitmap.CompressFormat.PNG, quality, out);
+                case JPEG:
+                    file = new File(myDir, filename + ".jpg");
+                    if (file.exists()) file.delete();
+                    out = new FileOutputStream(file);
+                    return bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out);
+                default:
+                    file = new File(myDir, filename + ".png");
+                    if (file.exists()) file.delete();
+                    out = new FileOutputStream(file);
+                    return bitmap.compress(Bitmap.CompressFormat.PNG, quality, out);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) {
+                    out.flush();
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
     }
 }
